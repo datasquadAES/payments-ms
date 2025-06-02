@@ -1,0 +1,45 @@
+services:
+  payments-ms:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_NAME=payments_db
+    depends_on:
+      - postgres
+    networks:
+      - pickhealthy-net
+
+  postgres:
+    image: postgres:15
+    container_name: postgres-payments-ms
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: payments_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - pickhealthy-net
+
+volumes:
+  postgres_data:
+
+networks:
+  pickhealthy-net:
+    external: true
+
+# Para reiniciar el volumen de postgres
+# docker-compose down
+# docker volume rm products-ms_postgres_data
+# docker-compose up --build
